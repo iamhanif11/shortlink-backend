@@ -22,7 +22,7 @@ func InitRouter(router *gin.Engine, db *pgxpool.Pool, rc *redis.Client) {
 	// router.Static("/img/profile", "public/img/profiles")
 
 	routeApi := router.Group("/api")
-	AuthRouter(routeApi, db)
+	AuthRouter(routeApi, db, rc)
 	LinkRouter(routeApi, router, db, rc)
 	router.NoRoute(func(ctx *gin.Context) {
 		ctx.JSON(http.StatusNotFound, dto.ErrorResponse{

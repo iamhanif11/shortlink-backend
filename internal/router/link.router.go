@@ -19,7 +19,7 @@ func LinkRouter(apiRouter *gin.RouterGroup, mainEngine *gin.Engine, db *pgxpool.
 	mainEngine.GET("/:slug", linkController.Redirect)
 
 	protected := apiRouter.Group("")
-	protected.Use(middleware.VerifyToken)
+	protected.Use(middleware.VerifyToken(rc))
 	{
 		protected.POST("/links", linkController.CreateLink)
 		protected.GET("/links", linkController.GetUserLinks)

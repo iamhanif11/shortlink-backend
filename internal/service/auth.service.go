@@ -4,21 +4,26 @@ import (
 	"context"
 	"errors"
 	"log"
+	"time"
 
+	"github.com/iamhanif11/shortlink-backend.git/internal/cache"
 	"github.com/iamhanif11/shortlink-backend.git/internal/dto"
 	"github.com/iamhanif11/shortlink-backend.git/internal/repository"
 	"github.com/iamhanif11/shortlink-backend.git/pkg"
+	"github.com/redis/go-redis/v9"
 )
 
 var ErrEmailAlreadyExists = errors.New("Email is already registered, please use another email")
 
 type AuthService struct {
 	authRepository *repository.AuthRepository
+	rc             *redis.Client
 }
 
-func NewAuthService(authRepository *repository.AuthRepository) *AuthService {
+func NewAuthService(authRepository *repository.AuthRepository, rc *redis.Client) *AuthService {
 	return &AuthService{
 		authRepository: authRepository,
+		rc:             rc,
 	}
 }
 
@@ -72,4 +77,12 @@ func (as *AuthService) LoginUser(ctx context.Context, user dto.LoginReq) (dto.Lo
 			Email: login.Email,
 		},
 	}, nil
+}
+
+func (as *AuthService) Logout(ctx context.Context, token string) error {
+	err := cache.SaveToBlacklist(ctx, as.rc, token, 24*time.Hour)
+	if err != nil {
+		return err
+	}
+	return nil
 }

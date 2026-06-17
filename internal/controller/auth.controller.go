@@ -96,3 +96,49 @@ func (ac *AuthController) Login(ctx *gin.Context) {
 		Results: res,
 	})
 }
+
+// @Summary      Logout User
+// @Description  Invalidate current JWT token by adding it to Redis blacklist
+// @Tags         Authentication
+// @Accept       json
+// @Produce      json
+// @Success      200 {object} dto.Response[any]     "Logout successful"
+// @Failure      401 {object} dto.ErrorResponse "Unauthorized or token not found"
+// @Failure      500 {object} dto.ErrorResponse "Internal server error"
+// @Router       /api/logout [delete]
+// @Security     ApiKeyAuth
+func (a *AuthController) Logout(ctx *gin.Context) {
+	rawToken, exists := ctx.Get("raw_token")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			Message: "Invalid session or token not found",
+			Success: false,
+		})
+		return
+	}
+
+	tokenString, ok := rawToken.(string)
+	if !ok || tokenString == "" {
+		ctx.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			Message: "Invalid token format",
+			Success: false,
+		})
+		return
+	}
+
+	//blacklist Redis melalui layer service
+	err := a.authService.Logout(ctx.Request.Context(), tokenString)
+	if err != nil {
+		log.Println("Logout Error: ", err.Error())
+		ctx.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Message: "Internal server error during logout process",
+			Success: false,
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, dto.Response[any]{
+		Message: "Logout successful, session invalidated",
+		Success: true,
+	})
+}
