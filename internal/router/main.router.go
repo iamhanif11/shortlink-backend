@@ -23,6 +23,7 @@ func InitRouter(router *gin.Engine, db *pgxpool.Pool) {
 
 	routeApi := router.Group("/api")
 	AuthRouter(routeApi, db)
+	LinkRouter(routeApi, db)
 	router.NoRoute(func(ctx *gin.Context) {
 		ctx.JSON(http.StatusNotFound, dto.ErrorResponse{
 			Message: "Invalid Route",

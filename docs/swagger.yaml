@@ -1,5 +1,14 @@
 basePath: /
 definitions:
+  dto.CreateLinkReq:
+    properties:
+      original_url:
+        type: string
+      slug:
+        type: string
+    required:
+    - original_url
+    type: object
   dto.ErrorResponse:
     properties:
       error:
@@ -7,6 +16,21 @@ definitions:
       isSucces:
         type: boolean
       message:
+        type: string
+    type: object
+  dto.LinkDetailRes:
+    properties:
+      click_count:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
+      original_url:
+        type: string
+      short_url:
+        type: string
+      slug:
         type: string
     type: object
   dto.LoginReq:
@@ -57,6 +81,15 @@ definitions:
       id:
         type: integer
     type: object
+  dto.Response-dto_LinkDetailRes:
+    properties:
+      data:
+        $ref: '#/definitions/dto.LinkDetailRes'
+      isSucces:
+        type: boolean
+      message:
+        type: string
+    type: object
   dto.Response-dto_LoginResponse:
     properties:
       data:
@@ -84,6 +117,45 @@ info:
   title: Backend Shortlink
   version: "1.0"
 paths:
+  /api/links:
+    post:
+      consumes:
+      - application/json
+      description: Authenticated users can transform a long destination URL into a
+        clean, short link. If custom slug is omitted, the system will auto-generate
+        a random unique identifier.
+      parameters:
+      - description: Create Link Payload (destination URL and optional custom slug)
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateLinkReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Shortlink created successfully
+          schema:
+            $ref: '#/definitions/dto.Response-dto_LinkDetailRes'
+        "400":
+          description: Bad Request - Validation error, reserved keyword used, or duplicate
+            slug
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized - Token missing or invalid signature
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error - Invalid token payload context format
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new short link
+      tags:
+      - Link Management
   /api/login:
     post:
       consumes:

@@ -49,8 +49,8 @@ func VerifyToken(ctx *gin.Context) {
 		})
 		return
 	}
-	ctx.Set("user_id", claims.Id)
-	ctx.Set("user_email", claims.Email)
+
+	ctx.Set("claims", claims)
 
 	ctx.Next()
 }
