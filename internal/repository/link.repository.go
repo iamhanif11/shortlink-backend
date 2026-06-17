@@ -60,3 +60,37 @@ func (l *LinkRepository) IsSlugExist(ctx context.Context, slug string) (bool, er
 
 	return true, nil
 }
+
+func (l *LinkRepository) GetLinksByUserId(ctx context.Context, userId int) ([]model.Link, error) {
+	q := `
+		SELECT id, user_id, original_url, slug, click_count, created_at
+		FROM links
+		WHERE user_id = $1 and deleted_at IS NULL
+		ORDER BY created_at DESC
+	`
+
+	rows, err := l.db.Query(ctx, q, userId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var links []model.Link
+	for rows.Next() {
+		var link model.Link
+		err := rows.Scan(
+			&link.Id,
+			&link.UserId,
+			&link.OriginalUrl,
+			&link.Slug,
+			&link.ClickCount,
+			&link.CreatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		links = append(links, link)
+	}
+
+	return links, nil
+}

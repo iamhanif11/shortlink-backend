@@ -81,6 +81,17 @@ definitions:
       id:
         type: integer
     type: object
+  dto.Response-array_dto_LinkDetailRes:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.LinkDetailRes'
+        type: array
+      isSucces:
+        type: boolean
+      message:
+        type: string
+    type: object
   dto.Response-dto_LinkDetailRes:
     properties:
       data:
@@ -118,6 +129,31 @@ info:
   version: "1.0"
 paths:
   /api/links:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all active short links created by the logged-in
+        user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of user shortlinks retrieved successfully
+          schema:
+            $ref: '#/definitions/dto.Response-array_dto_LinkDetailRes'
+        "401":
+          description: Unauthorized - Token missing or invalid
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error - Database or context error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get all short links for the authenticated user
+      tags:
+      - Link Management
     post:
       consumes:
       - application/json

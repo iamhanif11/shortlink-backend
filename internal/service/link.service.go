@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/iamhanif11/shortlink-backend.git/internal/dto"
 	"github.com/iamhanif11/shortlink-backend.git/internal/model"
@@ -69,4 +70,34 @@ func (l *LinkService) CreateShortLink(ctx context.Context, userId int, link dto.
 		ClickCount:  linkData.ClickCount,
 		CreatedAt:   *linkData.CreatedAt,
 	}, nil
+}
+
+func (l *LinkService) GetUserLinks(ctx context.Context, userId int) ([]dto.LinkDetailRes, error) {
+	linksData, err := l.linkRepo.GetLinksByUserId(ctx, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	//inisialisasi
+	var result []dto.LinkDetailRes = []dto.LinkDetailRes{}
+
+	for _, link := range linksData {
+		var createdAtTime time.Time
+		if link.CreatedAt != nil {
+			createdAtTime = *link.CreatedAt
+		} else {
+			createdAtTime = time.Now()
+		}
+
+		dtoLink := dto.LinkDetailRes{
+			Id:          link.Id,
+			OriginalUrl: link.OriginalUrl,
+			Slug:        link.Slug,
+			ShortUrl:    "https://short.link" + link.Slug,
+			ClickCount:  link.ClickCount,
+			CreatedAt:   createdAtTime,
+		}
+		result = append(result, dtoLink)
+	}
+	return result, nil
 }

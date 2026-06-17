@@ -78,3 +78,48 @@ func (l *LinkController) CreateLink(ctx *gin.Context) {
 		Results: res,
 	})
 }
+
+// @Summary      Get all short links for the authenticated user
+// @Description  Retrieve a list of all active short links created by the logged-in user.
+// @Tags         Link Management
+// @Accept       json
+// @Produce      json
+// @Success      200      {object}  dto.Response[[]dto.LinkDetailRes] "List of user shortlinks retrieved successfully"
+// @Failure      401      {object}  dto.ErrorResponse                 "Unauthorized - Token missing or invalid"
+// @Failure      500      {object}  dto.ErrorResponse                 "Internal Server Error - Database or context error"
+// @Router       /api/links [get]
+// @Security     ApiKeyAuth
+func (l *LinkController) GetUserLinks(ctx *gin.Context) {
+	token, exists := ctx.Get("claims")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			Message: "Unauthorized: Token not Exist",
+			Success: false,
+		})
+		return
+	}
+
+	claims, ok := token.(*pkg.Claims)
+	if !ok {
+		ctx.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Message: "Unauthorized: Format Token Invalid",
+			Success: false,
+		})
+		return
+	}
+
+	res, err := l.linkService.GetUserLinks(ctx.Request.Context(), claims.Id)
+	if err != nil {
+		log.Println("Error fetching user links:", err.Error())
+		ctx.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Message: "Internal server error failed to fetch links",
+			Success: false,
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, dto.Response[[]dto.LinkDetailRes]{
+		Message: "User links retrieved succesfully",
+		Success: true,
+		Results: res,
+	})
+}

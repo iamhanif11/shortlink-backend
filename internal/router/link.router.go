@@ -16,4 +16,5 @@ func LinkRouter(apiRouter *gin.RouterGroup, db *pgxpool.Pool) {
 	linkController := controller.NewLinkController(linkService)
 
 	apiRouter.POST("/links", linkController.CreateLink)
+	apiRouter.GET("/links", linkController.GetUserLinks)
 }
