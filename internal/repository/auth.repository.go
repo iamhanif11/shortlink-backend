@@ -22,13 +22,13 @@ func (ar *AuthRepository) AddUser(ctx context.Context, email, hashPassword strin
 	sql := `
 		INSERT INTO users (email, password) 
 		VALUES ($1, $2)
-		RETURNING id, email
+		RETURNING id, email, created_at
 	`
 	log.Println(email, hashPassword)
 	args := []any{email, hashPassword}
 
 	var user model.User
-	if err := ar.db.QueryRow(ctx, sql, args...).Scan(&user.Id, &user.Email); err != nil {
+	if err := ar.db.QueryRow(ctx, sql, args...).Scan(&user.Id, &user.Email, &user.CreatedAt); err != nil {
 		return model.User{}, err
 	}
 	return user, nil
@@ -37,7 +37,7 @@ func (ar *AuthRepository) AddUser(ctx context.Context, email, hashPassword strin
 func (ar *AuthRepository) GetUserByEmail(ctx context.Context, email string) (model.User, error) {
 	log.Println(email)
 	sql := `
-		SELECT id, email, password, name, photo, job,
+		SELECT id, email, password, name, photo, job
 		FROM users
 		WHERE email = $1
 	`

@@ -11,6 +11,16 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// @title						Backend Shortlink
+// @version						1.0
+// @description					Backend shortlink created by Hanif using Gin
+// @license.name				MIT
+// @host						localhost:8080
+// @BasePath					/
+// @securityDefinitions.apikey	ApiKeyAuth
+// @in							header
+// @name						Authorization
+// @description					Bearer token used for authorization (Format: Bearer <token>)
 func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Printf("Error loading env. \ncause: %s", err.Error())

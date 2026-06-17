@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"log"
 
 	"github.com/iamhanif11/shortlink-backend.git/internal/dto"
 	"github.com/iamhanif11/shortlink-backend.git/internal/repository"
@@ -39,5 +40,36 @@ func (as *AuthService) RegisterUser(ctx context.Context, user dto.RegisterReq) (
 		Id:        newUser.Id,
 		Email:     newUser.Email,
 		CreatedAt: newUser.CreatedAt,
+	}, nil
+}
+
+func (as *AuthService) LoginUser(ctx context.Context, user dto.LoginReq) (dto.LoginResponse, error) {
+	log.Println(user)
+	login, err := as.authRepository.GetUserByEmail(ctx, user.Email)
+	if err != nil {
+		log.Printf("repository error: %+v\n", err)
+		return dto.LoginResponse{}, errors.New("Email or Password Invalid !")
+	}
+
+	var hash pkg.HashConfig
+	if err := hash.Compare(user.Password, login.Password); err != nil {
+		return dto.LoginResponse{}, errors.New("Password not match")
+	}
+
+	claims := pkg.NewClaims(login.Id, login.Email)
+	token, err := claims.GenJWT()
+	if err != nil {
+		log.Println("GetUserByEmail Error:", err)
+		return dto.LoginResponse{}, err
+	}
+
+	log.Println(token)
+
+	return dto.LoginResponse{
+		Token: token,
+		User: dto.LoginUserDetail{
+			Id:    login.Id,
+			Email: login.Email,
+		},
 	}, nil
 }

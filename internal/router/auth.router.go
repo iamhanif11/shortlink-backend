@@ -19,5 +19,6 @@ func AuthRouter(apiRouter *gin.RouterGroup, db *pgxpool.Pool) {
 	// authMiddleware := middleware.NewAuthMiddleware(authRepository)
 
 	apiRouter.POST("/register", authController.Register)
+	apiRouter.POST("/login", authController.Login)
 
 }
