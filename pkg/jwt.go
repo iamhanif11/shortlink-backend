@@ -22,7 +22,8 @@ func NewClaims(id int, email string) *Claims {
 		Email: email,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    os.Getenv("JWT_ISSUER"),
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(jwtDuration)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(jwtDuration)),
+			IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 		},
 	}
 }
