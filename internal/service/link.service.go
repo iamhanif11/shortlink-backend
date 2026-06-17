@@ -9,15 +9,18 @@ import (
 	"github.com/iamhanif11/shortlink-backend.git/internal/model"
 	"github.com/iamhanif11/shortlink-backend.git/internal/repository"
 	"github.com/iamhanif11/shortlink-backend.git/pkg"
+	"github.com/redis/go-redis/v9"
 )
 
 type LinkService struct {
 	linkRepo *repository.LinkRepository
+	rc       *redis.Client
 }
 
-func NewLinkService(linkRepo *repository.LinkRepository) *LinkService {
+func NewLinkService(linkRepo *repository.LinkRepository, rc *redis.Client) *LinkService {
 	return &LinkService{
 		linkRepo: linkRepo,
+		rc:       rc,
 	}
 }
 
@@ -100,4 +103,17 @@ func (l *LinkService) GetUserLinks(ctx context.Context, userId int) ([]dto.LinkD
 		result = append(result, dtoLink)
 	}
 	return result, nil
+}
+
+func (l *LinkService) DeleteLink(ctx context.Context, id, userId int) error {
+	slug, err := l.linkRepo.SoftDeleteLink(ctx, id, userId)
+	if err != nil {
+		return err
+	}
+
+	//cache invalidation
+	redisKey := "link: " + slug
+	_ = l.rc.Del(ctx, redisKey).Err()
+
+	return nil
 }

@@ -48,7 +48,7 @@ func main() {
 	log.Println("Redis Connected")
 
 	// install router
-	router.InitRouter(app, db)
+	router.InitRouter(app, db, rc)
 	// run
 	// addr := fmt.Sprintf("%s:%s", os.Getenv("APP_HOST"), os.Getenv("APP_PORT"))
 	app.Run(fmt.Sprintf("%s:%s", os.Getenv("APP_HOST"), os.Getenv("APP_PORT")))

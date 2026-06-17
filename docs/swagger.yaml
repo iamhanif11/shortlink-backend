@@ -81,6 +81,14 @@ definitions:
       id:
         type: integer
     type: object
+  dto.Response-any:
+    properties:
+      data: {}
+      isSucces:
+        type: boolean
+      message:
+        type: string
+    type: object
   dto.Response-array_dto_LinkDetailRes:
     properties:
       data:
@@ -190,6 +198,42 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Create a new short link
+      tags:
+      - Link Management
+  /api/links/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Authenticated users can soft delete their own short links. The
+        cache in Redis will be invalidated instantly.
+      parameters:
+      - description: Short Link ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Shortlink deleted successfully
+          schema:
+            $ref: '#/definitions/dto.Response-any'
+        "400":
+          description: Bad Request - Invalid ID format
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized - Token invalid or missing
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "410":
+          description: Gone/Not Found - Link not found or already deleted
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Soft delete a short link
       tags:
       - Link Management
   /api/login:

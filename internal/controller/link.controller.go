@@ -3,6 +3,7 @@ package controller
 import (
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/iamhanif11/shortlink-backend.git/internal/dto"
@@ -121,5 +122,63 @@ func (l *LinkController) GetUserLinks(ctx *gin.Context) {
 		Message: "User links retrieved succesfully",
 		Success: true,
 		Results: res,
+	})
+}
+
+// @Summary      Soft delete a short link
+// @Description  Authenticated users can soft delete their own short links. The cache in Redis will be invalidated instantly.
+// @Tags         Link Management
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "Short Link ID"
+// @Success      200  {object}  dto.Response[any] "Shortlink deleted successfully"
+// @Failure      400  {object}  dto.ErrorResponse "Bad Request - Invalid ID format"
+// @Failure      410  {object}  dto.ErrorResponse "Gone/Not Found - Link not found or already deleted"
+// @Failure      401  {object}  dto.ErrorResponse "Unauthorized - Token invalid or missing"
+// @Router       /api/links/{id} [delete]
+// @Security     ApiKeyAuth
+func (l *LinkController) DeleteLink(ctx *gin.Context) {
+	//ambil param :id
+	idParam := ctx.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Message: "Invalid Id Format Parameter",
+			Success: false,
+		})
+		return
+	}
+
+	//claim jwt
+	token, exists := ctx.Get("claims")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			Message: "Unauthorized: Token not exist",
+			Success: false,
+		})
+		return
+	}
+
+	claims, ok := token.(*pkg.Claims)
+	if !ok {
+		ctx.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Message: "Unauthorized: Format token Invalid",
+			Success: false,
+		})
+		return
+	}
+
+	err = l.linkService.DeleteLink(ctx.Request.Context(), id, claims.Id)
+	if err != nil {
+		log.Println("Error Soft Delete:", err.Error())
+		ctx.JSON(http.StatusGone, dto.ErrorResponse{
+			Message: "Link not found or already delete",
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, dto.Response[any]{
+		Message: "Shortlink Deleted Succesfully",
+		Success: true,
 	})
 }

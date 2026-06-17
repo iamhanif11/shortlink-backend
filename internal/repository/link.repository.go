@@ -94,3 +94,25 @@ func (l *LinkRepository) GetLinksByUserId(ctx context.Context, userId int) ([]mo
 
 	return links, nil
 }
+
+func (l *LinkRepository) SoftDeleteLink(ctx context.Context, id, userId int) (string, error) {
+	//ambil slug
+	qSelect := `SELECT slug FROM links WHERE id = $1 AND user_id =$2 AND deleted_at IS NULL	`
+	var slug string
+	err := l.db.QueryRow(ctx, qSelect, id, userId).Scan(&slug)
+	if err != nil {
+		return "", err
+	}
+
+	qUpdate := `
+		UPDATE links
+		SET deleted_at = NOW()
+		WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL
+	`
+
+	_, err = l.db.Exec(ctx, qUpdate, id, userId)
+	if err != nil {
+		return "", err
+	}
+	return slug, nil
+}

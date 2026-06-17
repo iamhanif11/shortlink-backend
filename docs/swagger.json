@@ -107,6 +107,61 @@
                 }
             }
         },
+        "/api/links/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Authenticated users can soft delete their own short links. The cache in Redis will be invalidated instantly.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Link Management"
+                ],
+                "summary": "Soft delete a short link",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Short Link ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Shortlink deleted successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response-any"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid ID format",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Token invalid or missing",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "410": {
+                        "description": "Gone/Not Found - Link not found or already deleted",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/login": {
             "post": {
                 "description": "Authenticate user with email and password to get a JWT token",
@@ -321,6 +376,18 @@
                 },
                 "id": {
                     "type": "integer"
+                }
+            }
+        },
+        "dto.Response-any": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "isSucces": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },
