@@ -136,6 +136,32 @@ info:
   title: Backend Shortlink
   version: "1.0"
 paths:
+  /{slug}:
+    get:
+      consumes:
+      - application/json
+      description: Public endpoint to redirect users to the original long URL via
+        slug.
+      parameters:
+      - description: Short Link Slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "301":
+          description: Redirecting to original URL...
+          schema:
+            type: string
+        "404":
+          description: Short link not found or has been deleted
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Redirect short link to original URL
+      tags:
+      - Public Redirection
   /api/links:
     get:
       consumes:

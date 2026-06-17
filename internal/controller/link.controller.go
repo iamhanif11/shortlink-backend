@@ -182,3 +182,27 @@ func (l *LinkController) DeleteLink(ctx *gin.Context) {
 		Success: true,
 	})
 }
+
+// @Summary      Redirect short link to original URL
+// @Description  Public endpoint to redirect users to the original long URL via slug.
+// @Tags         Public Redirection
+// @Accept       json
+// @Produce      json
+// @Param        slug   path      string  true  "Short Link Slug"
+// @Success      301    {string}  string  "Redirecting to original URL..."
+// @Failure      404    {object}  dto.ErrorResponse "Short link not found or has been deleted"
+// @Router       /{slug} [get]
+func (l *LinkController) Redirect(ctx *gin.Context) {
+	slug := ctx.Param("slug")
+
+	originalUrl, err := l.linkService.RedirectSlug(ctx.Request.Context(), slug)
+
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, dto.ErrorResponse{
+			Message: "Shortlink not found or already expired",
+			Success: false,
+		})
+		return
+	}
+	ctx.Redirect(http.StatusMovedPermanently, originalUrl)
+}

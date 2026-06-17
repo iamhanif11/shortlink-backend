@@ -116,3 +116,20 @@ func (l *LinkRepository) SoftDeleteLink(ctx context.Context, id, userId int) (st
 	}
 	return slug, nil
 }
+
+func (l *LinkRepository) GetAndIncrementClick(ctx context.Context, slug string) (string, error) {
+	q := `
+		UPDATE links
+		SET click_count = click_count + 1
+		WHERE slug = $1 AND deleted_at IS NULL
+		RETURNING original_url
+	`
+
+	var originalUrl string
+	err := l.db.QueryRow(ctx, q, slug).Scan(&originalUrl)
+	if err != nil {
+		return "", err
+	}
+
+	return originalUrl, nil
+}

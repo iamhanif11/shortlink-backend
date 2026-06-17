@@ -253,6 +253,44 @@
                     }
                 }
             }
+        },
+        "/{slug}": {
+            "get": {
+                "description": "Public endpoint to redirect users to the original long URL via slug.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Public Redirection"
+                ],
+                "summary": "Redirect short link to original URL",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Short Link Slug",
+                        "name": "slug",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "301": {
+                        "description": "Redirecting to original URL...",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Short link not found or has been deleted",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {

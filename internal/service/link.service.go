@@ -117,3 +117,11 @@ func (l *LinkService) DeleteLink(ctx context.Context, id, userId int) error {
 
 	return nil
 }
+
+func (l *LinkService) RedirectSlug(ctx context.Context, slug string) (string, error) {
+	originalUrl, err := l.linkRepo.GetAndIncrementClick(ctx, slug)
+	if err != nil {
+		return "", nil
+	}
+	return originalUrl, nil
+}
