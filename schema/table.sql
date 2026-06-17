@@ -1,0 +1,23 @@
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    name VARCHAR(100),
+    photo VARCHAR(255),
+    job VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE links (
+    id BIGSERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    original_url TEXT NOT NULL,
+    slug VARCHAR(50) NOT NULL,
+    click_count BIGINT DEFAULT 0 NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP DEFAULT NULL,
+
+    CONSTRAINT fk_links_users FOREIGN KEY (user_id)
+        REFERENCES users (id) ON DELETE CASCADE
+);
