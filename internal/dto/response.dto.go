@@ -8,6 +8,6 @@ type ErrorResponse struct {
 
 type Response[T any] struct {
 	Message string `json:"message"`
-	Data    T      `json:"data,omitempty"`
+	Results T      `json:"data,omitempty"`
 	Success bool   `json:"isSucces"`
 }
