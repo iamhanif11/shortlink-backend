@@ -17,7 +17,7 @@ import (
 func VerifyToken(rc *redis.Client) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		bearerToken := ctx.GetHeader("Authorization")
-		if bearerToken == "" {
+		if bearerToken == "" || !strings.HasPrefix(strings.ToLower(bearerToken), "bearer ") {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, dto.ErrorResponse{
 				Success: false,
 				Message: "Unauthorized access, token missing",
@@ -33,7 +33,8 @@ func VerifyToken(rc *redis.Client) gin.HandlerFunc {
 			})
 			return
 		}
-		token := splittedBearer[1]
+		token := strings.TrimSpace(bearerToken[7:])
+		log.Println("Token utuh murni:", token)
 
 		if cache.IsTokenBlacklisted(ctx.Request.Context(), rc, token) {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, dto.ErrorResponse{
