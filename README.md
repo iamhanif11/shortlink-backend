@@ -191,10 +191,6 @@ swag init -g cmd/main.go
 - PostgreSQL is used as the primary relational database.
 - Soft delete is implemented using the `deleted_at` column.
 
-### Caching
-
-- Redis is used to cache URL lookup results.
-- Cached data reduces database queries during redirects.
 
 ### URL Slug Generation
 
